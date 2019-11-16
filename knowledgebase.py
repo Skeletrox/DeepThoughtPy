@@ -21,58 +21,66 @@ class KnowledgeBase(object):
 
     def getProofByResolution(self, l : Literal):
         l.negate() # Negate the literal!
+        inputLiterals = [l]
         literalCopy = deepcopy(self.literalMap)
         sentenceCopy = deepcopy(self.sentences)
-        while True:
-            
-            # Convert literal to key
-            key = (l.identifier, l.litType)
-            locations = literalCopy.get(key, [])
-            
-            neededSentence = None
-            for loc in locations:
-                sentence = sentenceCopy[loc]
-                literals = sentence.literals
-                for lit in literals:
-                    if (lit.identifier, lit.litType) == key and lit.canBeResolvedBy(l) and lit.negated != l.negated:
-                        # These can be resolved
-                        
-                        neededSentence = sentence                
-                        break
-                if neededSentence is not None:
-                    literalCopy[key].remove(loc) # We shall ignore this line now, because it has already been chosen
-                    break
 
-            if neededSentence is None: # This literal does not exist in the knowledge base | No further substitutions are possible
+        while True:            
+            # Iterate though all input literals to get the best matching sentence in KB
+            sentenceCountMap = {}
+            bestSentence = -1
+            for inlit in inputLiterals:
+                key = (inlit.identifier, inlit.litType)
+                locations = literalCopy.get(key, [])
+                for loc in locations:
+                    sentence = sentenceCopy[loc]
+                    literals = sentence.literals
+                    for lit in literals:
+                        if (lit.identifier, lit.litType) == key and lit.canBeResolvedBy(inlit) and lit.negated != inlit.negated:
+                            # These can be resolved
+                            sentenceCountMap[loc] = sentenceCountMap.get(loc, 0) + 1
+                            if sentenceCountMap[loc] > sentenceCountMap.get(bestSentence, -1):
+                                bestSentence = loc
+                            break
+
+            # There is no sentence with at least one of the appropriate literals
+            if bestSentence == -1:
                 return False
-            result = getResolution(neededSentence, l)
 
-            if result is None: # We ended up with a contradiction, so this is true
+            # Convert literal to key
+            neededSentence = sentenceCopy[bestSentence]
+            inputLiterals = getResolution(neededSentence, inputLiterals)
+            if inputLiterals is None:
                 return True
-            l = result[0]
-            
 
-
-
-def getResolution(sentence : Sentence, l : Literal):
+def getResolution(sentence : Sentence, lits : list):
     literals = sentence.literals
-    key = (l.identifier, l.litType)
-    # This is a conjunction of iterals
-    position = -1
-    for i in range(len(literals)):
-        if (literals[i].identifier, literals[i].litType) == key:
-            position = i
-            break
+    unification = {}
+    removableLits = []
+    for l in lits:
+    # For each literal, find the corresponding location and unify
+        key = (l.identifier, l.litType)
+        # This is a conjunction of iterals
+        position = -1
+        for i in range(len(literals)):
+            if (literals[i].identifier, literals[i].litType) == key:
+                position = i
+                break
 
-    if position == -1:
-        return None
-    
-    unification = getUnification(literals[position], l)
-    literals.pop(position)
-    if len(literals) == 0:
-        return None
+        if position != -1:
+            unification.update(getUnification(literals[position], l))
+            literals.pop(position)
+            removableLits.append(l)
+        if len(literals) == 0:
+            return None
+    lits = [l for l in lits if l not in removableLits]
     for i in range(len(literals)):
         literals[i] = substitute(literals[i], unification)
+
+    for i in range(len(lits)):
+        lits[i] = substitute(lits[i], unification)
+
+    literals.extend(lits)
 
     return literals
 

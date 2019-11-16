@@ -51,8 +51,7 @@ class Literal(object):
 
 
     def __str__(self):
-        return "Negated: {}, Identifier: {}, Type: {}, Args: {}".format(self.negated, self.identifier, self.litType, [str(a) for a in self.args] if self.args is not None else self.args)
-
+        return "{}{}{}".format("~" if self.negated else "", self.identifier, "({})".format(",".join([str(a) for a in self.args])) if self.litType == 'P' else "")
 
 def processArgs(args):
     """ Converts args into literals"""
