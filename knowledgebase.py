@@ -50,7 +50,7 @@ class KnowledgeBase(object):
             # Convert literal to key
             neededSentence = sentenceCopy[bestSentence]
             inputLiterals = getResolution(neededSentence, inputLiterals)
-            if inputLiterals is None:
+            if len(inputLiterals) == 0:
                 return True
 
 def getResolution(sentence : Sentence, lits : list):
@@ -58,7 +58,7 @@ def getResolution(sentence : Sentence, lits : list):
     unification = {}
     removableLits = []
     for l in lits:
-    # For each literal, find the corresponding location and unify
+        # For each literal, find the corresponding location and unify
         key = (l.identifier, l.litType)
         # This is a conjunction of iterals
         position = -1
@@ -72,16 +72,15 @@ def getResolution(sentence : Sentence, lits : list):
             literals.pop(position)
             removableLits.append(l)
         if len(literals) == 0:
-            return None
+            break
+
     lits = [l for l in lits if l not in removableLits]
     for i in range(len(literals)):
         literals[i] = substitute(literals[i], unification)
 
     for i in range(len(lits)):
         lits[i] = substitute(lits[i], unification)
-
     literals.extend(lits)
-
     return literals
 
 
