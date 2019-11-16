@@ -11,7 +11,7 @@ class Literal(object):
             inpString = inpString[1:]
         self.args = None
         # Check if first letter is small. If so, then this is a variable
-        if ord(inpString[0]) > ord('a') and ord(inpString[0]) < ord('z'):
+        if ord(inpString[0]) >= ord('a') and ord(inpString[0]) <= ord('z'):
             self.litType = 'V'
             self.identifier = inpString
         elif inpString.find('(') != -1:
@@ -32,16 +32,18 @@ class Literal(object):
         if self.litType == 'V':
             return other.litType != 'P'
 
-        # Constants can resolve with similar constants
+        # Constants can resolve with similar constants, or can resolve with another variable
         elif self.litType == 'C':
-            return self.identifier == other.identifier and other.litType == 'C'
+            return other.litType == 'V' or (self.identifier == other.identifier and other.litType == 'C')
 
         # Predicates only resolve with similar predicates and resolvable args
         else:
             if other.litType != 'P' or other.identifier != self.identifier or len(self.args) != len(other.args):
+                # print("Cannot resolve {} and {}".format(str(self), str(other)))
                 return False
             for i in range(len(self.args)):
                 if not self.args[i].canBeResolvedBy(other.args[i]):
+                    # print("Cannot resolve {} and {} because of {} and {}".format(str(self), str(other), str(self.args[i]), str(other.args[i])))
                     return False
 
         return True

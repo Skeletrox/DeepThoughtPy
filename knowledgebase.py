@@ -24,7 +24,7 @@ class KnowledgeBase(object):
         inputLiterals = [l]
         literalCopy = deepcopy(self.literalMap)
         sentenceCopy = deepcopy(self.sentences)
-
+        alreadySelected = {}
         while True:            
             # Iterate though all input literals to get the best matching sentence in KB
             sentenceCountMap = {}
@@ -39,7 +39,7 @@ class KnowledgeBase(object):
                         if (lit.identifier, lit.litType) == key and lit.canBeResolvedBy(inlit) and lit.negated != inlit.negated:
                             # These can be resolved
                             sentenceCountMap[loc] = sentenceCountMap.get(loc, 0) + 1
-                            if sentenceCountMap[loc] > sentenceCountMap.get(bestSentence, -1):
+                            if sentenceCountMap[loc] > sentenceCountMap.get(bestSentence, -1) and alreadySelected.get(loc, None) is None:
                                 bestSentence = loc
                             break
 
@@ -52,6 +52,7 @@ class KnowledgeBase(object):
             inputLiterals = getResolution(neededSentence, inputLiterals)
             if len(inputLiterals) == 0:
                 return True
+            # print([str(i) for i in inputLiterals])
 
 def getResolution(sentence : Sentence, lits : list):
     literals = sentence.literals
@@ -73,6 +74,7 @@ def getResolution(sentence : Sentence, lits : list):
             removableLits.append(l)
         if len(literals) == 0:
             break
+        
 
     lits = [l for l in lits if l not in removableLits]
     for i in range(len(literals)):
