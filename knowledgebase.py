@@ -10,7 +10,8 @@ class KnowledgeBase(object):
         for i in range(len(inputs)):
             s = Sentence(inputs[i])
             for lit in s.literals:
-                self.literalMap[(lit.identifier, lit.litType)] = self.literalMap.get((lit.identifier, lit.litType), []) + [i]
+                self.literalMap[(lit.identifier, lit.litType)] = self.literalMap.get((lit.identifier, lit.litType), {})
+                self.literalMap[(lit.identifier, lit.litType)].update({i : True})
 
             self.sentences.append(s)
 
@@ -39,7 +40,7 @@ class KnowledgeBase(object):
                         if (lit.identifier, lit.litType) == key and lit.canBeResolvedBy(inlit) and lit.negated != inlit.negated:
                             # These can be resolved
                             sentenceCountMap[loc] = sentenceCountMap.get(loc, 0) + 1
-                            if sentenceCountMap[loc] > sentenceCountMap.get(bestSentence, -1) and alreadySelected.get(loc, None) is None:
+                            if sentenceCountMap[loc] > sentenceCountMap.get(bestSentence, -1):
                                 bestSentence = loc
                             break
 
@@ -47,12 +48,11 @@ class KnowledgeBase(object):
             if bestSentence == -1:
                 return False
 
-            # Convert literal to key
             neededSentence = sentenceCopy[bestSentence]
             inputLiterals = getResolution(neededSentence, inputLiterals)
             if len(inputLiterals) == 0:
                 return True
-            # print([str(i) for i in inputLiterals])
+            # print([str(i) for i in inputLiterals]) # For debug purposes
 
 def getResolution(sentence : Sentence, lits : list):
     literals = sentence.literals
@@ -64,7 +64,8 @@ def getResolution(sentence : Sentence, lits : list):
         # This is a conjunction of iterals
         position = -1
         for i in range(len(literals)):
-            if (literals[i].identifier, literals[i].litType) == key:
+            # Only select the appropriate, negatable literal
+            if (literals[i].identifier, literals[i].litType) == key and l.negated != literals[i].negated:
                 position = i
                 break
 
@@ -97,6 +98,7 @@ def getUnification(original : Literal, new : Literal):
 
 
 def substitute(lit : Literal, unification : dict):
+    # print("Trying to unify {} with {}".format(str(lit), unification)) # For debug purposes
     if lit.litType != 'P':
         # If the unification does not contain this identifier, then just return this
         lit.identifier, lit.litType = unification.get((lit.identifier, lit.litType), (lit.identifier, lit.litType))

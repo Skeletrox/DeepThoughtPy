@@ -39,11 +39,11 @@ class Literal(object):
         # Predicates only resolve with similar predicates and resolvable args
         else:
             if other.litType != 'P' or other.identifier != self.identifier or len(self.args) != len(other.args):
-                # print("Cannot resolve {} and {}".format(str(self), str(other)))
+                # print("Cannot resolve {} and {}".format(str(self), str(other))) # For debug purposes
                 return False
             for i in range(len(self.args)):
                 if not self.args[i].canBeResolvedBy(other.args[i]):
-                    # print("Cannot resolve {} and {} because of {} and {}".format(str(self), str(other), str(self.args[i]), str(other.args[i])))
+                    # print("Cannot resolve {} and {} because of {} and {}".format(str(self), str(other), str(self.args[i]), str(other.args[i]))) # For debug purposes
                     return False
 
         return True
