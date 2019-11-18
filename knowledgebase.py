@@ -10,8 +10,8 @@ class KnowledgeBase(object):
         for i in range(len(inputs)):
             s = Sentence(inputs[i])
             for lit in s.literals:
-                self.literalMap[(lit.identifier, lit.litType)] = self.literalMap.get((lit.identifier, lit.litType), {})
-                self.literalMap[(lit.identifier, lit.litType)].update({i : True})
+                self.literalMap[(lit.identifier, lit.litType)] = self.literalMap.get((lit.identifier, lit.litType), []) + [i]
+                # self.literalMap[(lit.identifier, lit.litType)].update({i : True})
 
             self.sentences.append(s)
 
@@ -51,6 +51,8 @@ class KnowledgeBase(object):
             neededSentence = sentenceCopy[bestSentence]
             inputLiterals = getResolution(neededSentence, inputLiterals)
             if len(inputLiterals) == 0:
+                self.sentences.append(Sentence(str(l)))
+                self.literalMap[(l.identifier, l.litType)] = self.literalMap.get((l.identifier, l.litType), []) + [len(self.sentences) - 1]
                 return True
             # print([str(i) for i in inputLiterals]) # For debug purposes
 

@@ -26,7 +26,7 @@ def main():
     for q in queries:
         lit = Literal(q)
         result = kb.getProofByResolution(lit)
-        print(result)
+        print("{}: {}".format(q, result))
 
 if __name__ == "__main__":
     main()
