@@ -2,7 +2,7 @@
 
 class Literal(object):
     """A literal is a basic logical unit, that is made of composites of itself"""
-    def __init__(self, inpString : str):
+    def __init__(self, inpString : str, sNum : int):
         """ The inpstring is parsed to get the output"""
 
         # Check if first letter implies negation
@@ -13,7 +13,7 @@ class Literal(object):
         # Check if first letter is small. If so, then this is a variable
         if ord(inpString[0]) >= ord('a') and ord(inpString[0]) <= ord('z'):
             self.litType = 'V'
-            self.identifier = inpString
+            self.identifier = "{}_{}".format(inpString, sNum)
         elif inpString.find('(') != -1:
             # There is a bracket in this, this is a predicate
             self.litType = 'P'
@@ -21,7 +21,7 @@ class Literal(object):
             self.identifier = inpString[:openBrackets]
             closeBrackets = inpString.find(')')
             args = inpString[openBrackets+1:closeBrackets].split(',')
-            self.args = processArgs(args)
+            self.args = processArgs(args, sNum)
         else:
             self.litType = 'C'
             self.identifier = inpString
@@ -32,9 +32,9 @@ class Literal(object):
         if self.litType == 'V':
             return other.litType != 'P'
 
-        # Constants can resolve with similar constants, or can resolve with another variable
+        # Constants can resolve with similar constants
         elif self.litType == 'C':
-            return other.litType == 'V' or (self.identifier == other.identifier and other.litType == 'C')
+            return self.identifier == other.identifier and other.litType == 'C'
 
         # Predicates only resolve with similar predicates and resolvable args
         else:
@@ -52,15 +52,40 @@ class Literal(object):
         self.negated ^= True;
 
 
+    def __hash__(self):
+        return hash((self.identifier, self.litType))
+
+    def __eq__(self, other):
+        return (self.identifier, self.litType) == (other.identifier, other.litType)
+
     def __str__(self):
         return "{}{}{}".format("~" if self.negated else "", self.identifier, "({})".format(",".join([str(a) for a in self.args])) if self.litType == 'P' else "")
 
-def processArgs(args):
+    def deepEquals(self, other):
+        if self.litType != other.litType:
+            return False
+        elif self.litType == 'P':
+            if len(other.args) !=len(self.args) or self.identifier != other.identifier:
+                return False
+            else:
+                for i in range(len(self.args)):
+                    res = self.args[i] == other.args[i]
+                    if not res:
+                        return False
+                return True
+        else:
+            return self.identifier == other.identifier
+
+
+    def __neq__(self, other):
+        return not self.__eq__(other)
+
+def processArgs(args, sNum):
     """ Converts args into literals"""
     returnable = []
     for a in args:
         a = a.strip()
-        literal = Literal(a)
+        literal = Literal(a, sNum)
         returnable.append(literal)
 
     return returnable

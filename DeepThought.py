@@ -24,8 +24,9 @@ def main():
     kb = KnowledgeBase(truths)
 
     for q in queries:
-        lit = Literal(q)
-        result = kb.getProofByResolution(lit)
+        lit = Literal(q, len(truths)+1)
+        lit.negate()
+        result = kb.proveByResolution2([lit], 0)
         print("{}: {}".format(q, result))
 
 if __name__ == "__main__":

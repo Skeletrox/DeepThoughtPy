@@ -1,13 +1,12 @@
-8
+7
 Alert(Bob,NSAIDs)
-Alert(Bob,VitC)
 Alert(Alice,NSAIDs)
 Faster(Vettel,Kvyat)
 ~Faster(Kvyat,Vettel)
 Mother(Jane,Jack)
 Criminal(Kanye)
 Criminal(Tanya)
-26
+28
 Take(x,Warfarin) => ~Take(x,NSAIDs)
 Male(x) & LivesInCalifornia(x) & HighBP(x) => Alert(x,NSAIDs)
 Take(Bob,Antacids)
@@ -22,9 +21,11 @@ Faster(x,y) => ~Faster(y,x)
 Faster(Vettel,Bottas)
 Faster(Bottas,Kvyat)
 Married(x,y) & Father(x,z) => Mother(y,z)
-Straight(x) & Straight(y) => Married(x,y)
+Male(x) & Straight(x) & Female(y) & Straight(y) => Married(x,y)
 Straight(John)
 Straight(Jane)
+Male(John)
+Female(Jane)
 Father(John,Jack)
 Sells(x,y,z) & American(x) & Enemy(z) & Weapon(y) => Criminal(x)
 Missile(x) => Weapon(x)
