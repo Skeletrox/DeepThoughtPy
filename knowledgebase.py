@@ -225,17 +225,17 @@ def substitute(lit : Literal, unification : dict):
 
 def purgeCommon(lits1 : List[Literal], lits2 : List[Literal]):
     returnable = []
-    for l1 in lits1:
-        loc = -1
-        for i in range(len(lits2)):
-            if l1.deepEquals(lits2[i]) and l1.negated != lits2[i].negated:
+    for i in range(len(lits1)):
+        loc1,loc2 = i,-1
+        for j in range(len(lits2)):
+            if lits1[i].deepEquals(lits2[j]) and lits1[i].negated != lits2[j].negated:
                 # print("{} and {} cancel out".format(l1, lits2[i]))
-                loc = i
+                loc1,loc2 = i,j
                 break
-        if loc == -1:
-            returnable.append(l1)
-        else:
-            lits2.pop(loc)
-
+        if loc2 != -1:
+            lits1.pop(loc1)
+            lits2.pop(loc2)
+            break
+    returnable.extend(lits1)
     returnable.extend(lits2)
     return returnable

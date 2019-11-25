@@ -23,11 +23,16 @@ def main():
 
     kb = KnowledgeBase(truths)
 
+    results = []
     for q in queries:
         lit = Literal(q, len(truths)+1)
         lit.negate()
         result = kb.proveByResolution2([lit], 0)
         print("{}: {}".format(q, result))
+        results.append(str(result).upper())
+    
+    with open('./output.txt', 'w') as op:
+        op.write('\n'.join([r for r in results]))
 
 if __name__ == "__main__":
     main()
